@@ -8,6 +8,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { useProjectStore } from './state/useProjectStore'
 import { ModelProvider } from './state/ModelContext'
+import { EasyMode } from './components/EasyMode'
 import { EvidenceBadge } from './components/EvidenceBadge'
 import { Callout } from './components/ui'
 import { GeneratePanel } from './features/generator/GeneratePanel'
@@ -43,9 +44,35 @@ export function App() {
   )
 }
 
+/**
+ * Guided mode is a per-viewer preference, so it lives in localStorage rather
+ * than in the project. Storage can be unavailable in a private window or with
+ * site data blocked, and the application has to work without it.
+ */
+const EASY_MODE_KEY = 'akl.easyMode'
+
+function readEasyMode(): boolean {
+  try {
+    return window.localStorage.getItem(EASY_MODE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
 function Workspace() {
   const store = useProjectStore()
   const [tab, setTab] = useState<TabId>(() => tabFromHash())
+  const [easy, setEasy] = useState<boolean>(() => readEasyMode())
+
+  const toggleEasy = () => {
+    const next = !easy
+    setEasy(next)
+    try {
+      window.localStorage.setItem(EASY_MODE_KEY, next ? '1' : '0')
+    } catch {
+      // A remembered preference is a convenience, not a requirement.
+    }
+  }
 
   useEffect(() => {
     const onHashChange = () => setTab(tabFromHash())
@@ -96,9 +123,22 @@ function Workspace() {
             {chartHeightCm(project.grid.rows, project.gauge).toFixed(1)} cm
           </span>
           <EvidenceBadge status={store.evidence} />
+          <button
+            type="button"
+            className={easy ? 'mode-toggle on' : 'mode-toggle'}
+            role="switch"
+            aria-checked={easy}
+            onClick={toggleEasy}
+          >
+            <span className="mode-toggle-track" aria-hidden="true">
+              <span className="mode-toggle-knob" />
+            </span>
+            Guided mode
+          </button>
         </div>
       </header>
 
+      {easy ? null : (
       <nav className="tabs" aria-label="Workflow">
         {TABS.map((entry) => (
           <button
@@ -112,8 +152,11 @@ function Workspace() {
           </button>
         ))}
       </nav>
+      )}
 
       <main>
+        {easy ? <EasyMode store={store} /> : (
+          <>
         {tab === 'generate' ? <GeneratePanel store={store} onNavigate={select} /> : null}
         {tab === 'knit' ? <KnitPanel store={store} onNavigate={select} /> : null}
         {tab === 'evaluate' ? (
@@ -126,6 +169,8 @@ function Workspace() {
             <ExportPanel store={store} />
           </Suspense>
         ) : null}
+          </>
+        )}
       </main>
 
       <footer className="app-footer">

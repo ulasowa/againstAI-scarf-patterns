@@ -196,6 +196,32 @@ left its preview process behind made the next run wait on an occupied port.
 `scripts/free-port.mjs` now releases the port first, and falls back to doing
 nothing where `lsof` is unavailable.
 
+### 13. Guided mode — added, and audited with the rest
+
+The full interface exposes every parameter because the measurements depend on
+them, which is right for someone checking the method and wrong for someone who
+wants to knit a scarf. A header switch replaces it with four steps.
+
+Audited on the same terms as everything else: axe-core over all four steps at
+WCAG A/AA plus best practice, a height ceiling of two screens per step, a
+`role="switch"` toggle with `aria-checked`, and a preference read through a
+guarded `localStorage` access so a private window degrades rather than breaks.
+
+One defect found by that audit: the difficulty labels added in step 1 reached
+only **4.47:1** against the tinted background of a selected card. A
+`--warn-text` token at **6.43 / 5.18** replaced it.
+
+Two substantive findings came out of building it, both about the product rather
+than the interface:
+
+- The starter chart was awkward to knit — the guided step 4 said so, in the
+  words "1317 single stitches sit on their own". The new pattern families are
+  built for detector structure, not knittability. The starter is now the one
+  preset that is genuinely straightforward (two colours, no row over the
+  stranded limit, longest float four stitches).
+- Presets now carry a plain difficulty label computed from their measured
+  figures, so the awkward ones say so before they are chosen rather than after.
+
 ## Not checked
 
 - **Screen readers.** No VoiceOver, NVDA or JAWS pass was made. Automated rules

@@ -71,7 +71,11 @@ export interface ProjectStore {
  * procedural candidate, and the evidence badge says so.
  */
 function createStarterProject(): KnittingProject {
-  const preset = PRESETS[0]
+  // The most straightforward of the presets to knit: two colours, no row over
+  // the stranded limit, longest float four stitches. The others are built for
+  // detector structure rather than for knitting and several are awkward, which
+  // is a poor thing to open on.
+  const preset = PRESETS.find((entry) => entry.id === 'micro-checks') ?? PRESETS[0]
   const base = createProject()
   if (!preset) return base
 

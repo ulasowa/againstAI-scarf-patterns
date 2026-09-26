@@ -21,6 +21,18 @@ about face detection or face recognition, which are different tasks.
 Controls are grouped into sub-tabs so each view fits a screen rather than
 running several screen-heights deep; see `docs/ui-audit.md`.
 
+## Two ways in
+
+A **Guided mode** switch sits in the header. It replaces the four-tab interface
+with four steps — pick a pattern, choose yarn and size, test it against a
+detector, download the knitting document — exposing only the decisions that
+change the outcome. Every caveat from the full interface has a plain-language
+equivalent there; a guided interface that implied the pattern works would be
+worse than a dense one, because the person using it has less to go on.
+
+The preference is remembered per browser. Everything below describes the full
+interface.
+
 ## The workflow
 
 1. **Generate** — a reproducible pattern from a seed and a handful of shape

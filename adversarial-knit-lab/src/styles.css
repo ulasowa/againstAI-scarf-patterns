@@ -24,6 +24,10 @@
   --accent-soft: #f2e4de;
   --blue: #0b5fff;
   --warn: #8a6100;
+  /* The warn colour is fine as a border but reaches only 4.47:1 as text on the
+     accent tint, so warn-coloured TEXT uses a darker value: 6.43 on white and
+     5.18 on the tint. */
+  --warn-text: #7d5800;
   --warn-soft: #fbf1d8;
   --error: #9a2617;
   --error-soft: #fbe6e2;
@@ -552,3 +556,128 @@ table.probe-results td:last-child { white-space: normal; min-width: 18ch; }
   margin-top: 8px;
 }
 .camera-preview.live { display: block; }
+
+/* Guided mode ------------------------------------------------------ */
+
+.mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 4px 12px 4px 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.mode-toggle.on { color: var(--ink); border-color: var(--accent); background: var(--accent-soft); }
+
+.mode-toggle-track {
+  width: 30px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--rule);
+  position: relative;
+  transition: background 120ms;
+  flex: none;
+}
+.mode-toggle.on .mode-toggle-track { background: var(--accent); }
+.mode-toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--surface);
+  transition: transform 120ms;
+}
+.mode-toggle.on .mode-toggle-knob { transform: translateX(12px); }
+
+.easy { max-width: 820px; margin: 0 auto; }
+
+.easy-steps {
+  display: flex;
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  gap: 2px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.easy-steps li { flex: 1 1 0; }
+.easy-steps button {
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  background: #fbfaf7;
+  padding: 11px 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.easy-steps li.active button { background: var(--surface); color: var(--ink); box-shadow: inset 0 -2px 0 var(--accent); }
+.easy-steps li.done button { color: var(--ink); }
+.easy-step-number {
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  display: inline-grid;
+  place-items: center;
+  font-size: 11px;
+  flex: none;
+}
+.easy-steps li.active .easy-step-number { background: var(--accent); color: #fff; border-color: transparent; }
+.easy-steps li.done .easy-step-number { background: var(--ok-soft); color: var(--ok); }
+
+.easy-body {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.easy-body h2 { font-size: 17px; text-transform: none; letter-spacing: -0.01em; color: var(--ink); margin-bottom: 4px; }
+.easy-body h3 { font-size: 13px; margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); }
+.easy-body .lead { font-size: 14px; color: var(--ink-soft); max-width: 62ch; margin-bottom: 16px; }
+
+.easy-choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.easy-choices.compact { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.easy-choice { display: flex; flex-direction: column; gap: 5px; padding: 7px; text-align: left; align-items: stretch; }
+.easy-choice strong { font-size: 12.5px; }
+.easy-choice span { font-size: 11.5px; color: var(--ink-soft); }
+.easy-choice.active { border-color: var(--accent); background: var(--accent-soft); }
+.easy-choice .texture-preview figcaption { display: none; }
+
+.easy-file { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; font-size: 12px; color: var(--ink-soft); }
+
+.easy-result { margin-top: 16px; border-top: 1px solid var(--rule); padding-top: 12px; }
+.easy-headline { font-size: 15px; color: var(--ink); max-width: 62ch; }
+
+.easy-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 16px;
+}
+.easy-nav .hint { margin: 0; }
+
+@media (max-width: 700px) {
+  .easy-steps button { flex-direction: column; gap: 3px; font-size: 11px; padding: 9px 4px; }
+  .easy-body { padding: 13px; }
+}
+
+@media (pointer: coarse) {
+  .easy-steps button { min-height: 52px; }
+}
+
+.easy-choice .ease { font-size: 11px; }
+.easy-choice .ease.ok { color: var(--ok); }
+.easy-choice .ease.warn { color: var(--warn-text); }
