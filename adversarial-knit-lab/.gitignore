@@ -1,0 +1,8 @@
+node_modules
+dist
+dist-nested
+dist-offline
+test-results
+playwright-report
+*.local
+.DS_Store

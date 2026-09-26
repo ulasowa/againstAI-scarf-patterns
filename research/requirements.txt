@@ -1,0 +1,7 @@
+# Pinned so an experiment can be repeated. Split into two layers: the bridge
+# runs anywhere, the optimisation layer needs a GPU and is installed separately.
+
+# --- Bridge layer: texture <-> knitting chart. No ML dependencies. ---------
+numpy==2.2.6
+pillow==12.3.0
+pyyaml==6.0.2

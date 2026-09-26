@@ -1,0 +1,51 @@
+# Smallest configuration that exercises the optimisation layer end to end.
+#
+# STATUS: not executed in this repository. It is sized so that a first run
+# finishes in minutes rather than days, and so that a mistake is cheap.
+
+run_id: smoke
+
+detector:
+  id: torchvision/fasterrcnn_resnet50_fpn_v2
+  weights: FasterRCNN_ResNet50_FPN_V2_Weights.COCO_V1
+  device: cuda
+  person_class_index: 1
+  score_threshold: 0.35
+
+texture:
+  # Stitch dimensions, not pixels. The optimiser works at chart resolution so
+  # that what it optimises is what can be knitted.
+  stitches: 32
+  rows: 40
+  tile: true
+  palette:
+    - "#1b1d1c"
+    - "#e8e3d6"
+    - "#7d7f6f"
+    - "#b4522f"
+
+optimisation:
+  # Deliberately tiny. A smoke test proves the wiring, not the method.
+  steps: 20
+  batch_size: 2
+  learning_rate: 0.05
+  quantisation: straight-through   # named, approximate, unvalidated
+  seed: 1
+
+data:
+  # Supply your own photographs. None are committed to this repository.
+  images: data/smoke/*.jpg
+  optimisation_split: 0.5
+
+compute:
+  # Measured requirements for the full configuration are unknown, because it
+  # has not been run. These are the minimums the smoke config was sized for.
+  gpu: "1x CUDA GPU, >= 8 GB VRAM"
+  expected_runtime: "minutes for the smoke config; unmeasured for anything larger"
+  disk: "~250 MB for torch weights"
+
+output:
+  dir: out/smoke
+  # Always re-evaluate the hard-quantised chart. The optimiser's own numbers
+  # describe the unquantised texture.
+  requantize_and_report: true

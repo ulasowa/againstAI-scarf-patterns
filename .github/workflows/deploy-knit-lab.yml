@@ -1,0 +1,98 @@
+name: Adversarial Knit Lab
+
+# The site is published from `main` and from the feature branch that carries
+# this application, so the branch can be reviewed as a live page rather than a
+# diff. A manual run publishes whatever branch it is dispatched on.
+on:
+  push:
+    branches: [main, adversarial-knit-lab]
+    paths:
+      - 'adversarial-knit-lab/**'
+      - '.github/workflows/deploy-knit-lab.yml'
+  pull_request:
+    paths:
+      - 'adversarial-knit-lab/**'
+  workflow_dispatch:
+
+# Least privilege: read the repository, publish Pages, and nothing else.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; queued runs are not cancelled mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: adversarial-knit-lab
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install the pinned Node version
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: adversarial-knit-lab/.nvmrc
+          cache: npm
+          cache-dependency-path: adversarial-knit-lab/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Domain tests
+        run: npm run test
+
+      - name: Build the static site
+        # No base path to compute: the build is relative, so the same output
+        # works at a domain root, under a repository subpath, and from a local
+        # folder. See docs/deployment.md.
+        run: npm run build
+
+      - name: Build the single-file offline copy
+        run: npm run build:offline
+
+      - name: Configure Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+        with:
+          # Switches the Pages source to GitHub Actions, and turns Pages on if
+          # it is off, so the first run does not need a visit to Settings.
+          enablement: true
+
+      - name: Publish the offline copy alongside the site
+        run: cp dist-offline/adversarial-knit-lab.html dist/adversarial-knit-lab-offline.html
+
+      - name: Upload the built site
+        uses: actions/upload-artifact@v4
+        with:
+          name: adversarial-knit-lab-site
+          path: adversarial-knit-lab/dist
+          retention-days: 14
+
+      - name: Upload the Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: adversarial-knit-lab/dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

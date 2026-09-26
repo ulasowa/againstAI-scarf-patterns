@@ -1,0 +1,13 @@
+# Optimisation layer. Installed on top of requirements.txt, and only on a
+# machine with a CUDA GPU. These versions were selected from each project's
+# published compatibility matrix on 2026-09-25 and have NOT been installed or
+# executed in this repository -- see README.md, "What has not been run".
+#
+#   pip install -r requirements.txt -r requirements-optim.txt
+#
+# torch is intentionally unpinned as to build: install the wheel matching your
+# CUDA version from https://pytorch.org/get-started/locally/ first, then this.
+
+torch==2.5.1
+torchvision==0.20.1
+adversarial-robustness-toolbox==1.18.2

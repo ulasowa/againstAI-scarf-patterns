@@ -1,0 +1,77 @@
+{
+  "format": "adversarial-knit-lab.project",
+  "schemaVersion": 1,
+  "project": {
+    "id": "research_5b9fb2a4caff",
+    "title": "Research bridge fixture",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "modifiedAt": "1970-01-01T00:00:00.000Z",
+    "generator": {
+      "family": "imported-image",
+      "version": "research-1.0.0",
+      "seed": 0,
+      "params": {
+        "featureSize": 8,
+        "detailBalance": 0.5,
+        "contrast": 0.5,
+        "density": 0.5,
+        "warp": 0.0,
+        "symmetry": 0.0,
+        "minRegion": 0,
+        "tileRepeat": true,
+        "variant": "imported"
+      }
+    },
+    "grid": {
+      "stitches": 40,
+      "rows": 67,
+      "encoding": "rle-v1",
+      "cells": "2x14.0.2.0x4.2x17.0x2.2x17.0x2.2x18.0x4.2x14.0x4.2x2.0.2x14.0.2.0x3.2x14.0x4.2.0x2.2x15.0x4.2x13.0x8.2x14.0x5.2x13.0x7.2x15.0x5.2x12.0x10.2x13.0x5.2x13.0x7.2x15.0x5.2x13.0x7.2x15.0x5.2x13.0x7.2x16.0x4.2x13.0x6.2x16.0x5.2x14.0x5.2x17.0x4.2x14.0x2.2.0x2.2x17.0x4.2x15.0x4.2x18.0x3.2x15.0x2.2x2.0.2x18.0x2.2x56.0.2x28.3.2x22.3x2.2x15.3x2.2.3.2x16.3x2.2.3.2x13.3.2x2.3x2.2x17.3x3.2.3x2.2x12.3x6.2x15.3.2.3x6.2x11.3x6.2.3.2x14.3x8.2x9.3x9.2x13.3x9.2x9.3x9.2x12.3x10.2x9.3x9.2x12.3x10.2x9.3x10.2x12.3x10.2x7.3x12.2x10.3x11.2x7.3x10.2.3.2x10.3x11.2x7.3x10.2x12.3x11.2x8.3x9.2x12.3x10.2x8.3x10.2x13.3x9.2x10.3x8.2x15.3x7.2x10.3x8.2x14.3x7.2x11.3x8.2x14.3.2.3x6.2x10.3x6.2x17.3x6.2x13.3x4.2x18.3x4.2x37.3.2.3.2x57.3.2x8.0.2x11.3.2x9.0x2.2x36.0x2.2x17.0.2x19.0x5.2x15.0x4.2x16.0x5.2x15.0x3.2.0.2x15.0x5.2x14.0x6.2x17.0x3.2x12.0x8.2x16.0x4.2x13.0x7.2x16.0x4.2x12.0x8.2x15.0.2.0x3.2x14.0x7.2x14.0x5.2x13.0x6.2x15.0x6.2x13.0x7.2x16.0x4.2x14.0x6.2x15.0.2.0x3.2x15.0x5.2x16.0x4.2x15.0x5.2x14.0.2.0x4.2x15.0.2x3.0.2x17.0x2.2x87.3.2x20.3x3.2x15.3x3.2x18.3x2.2x16.3x2.2.3.2.3.2x15.3.2.3.2.3x2.2x12.3x6.2x16.3x7.2x9.3x8.2x15.3x7.2x10.3x9.2x13.3x9.2x11.3x7.2x13.3x9.2.3.2x7.3x9.2x13.3x9.2x9.3x10.2x12.3x10.2x7.3x11.2x11.3x6.1.3x3.2x8.3x10.2x13.3x10.2x7"
+    },
+    "palette": [
+      {
+        "id": "c1",
+        "hex": "#1b1d1c",
+        "symbol": ".",
+        "name": "Charcoal"
+      },
+      {
+        "id": "c2",
+        "hex": "#e8e3d6",
+        "symbol": "o",
+        "name": "Undyed"
+      },
+      {
+        "id": "c3",
+        "hex": "#7d7f6f",
+        "symbol": "/",
+        "name": "Lichen"
+      },
+      {
+        "id": "c4",
+        "hex": "#b4522f",
+        "symbol": "x",
+        "name": "Madder"
+      }
+    ],
+    "gauge": {
+      "stitchesPer10cm": 20.0,
+      "rowsPer10cm": 28.0
+    },
+    "workingMethod": "flat-stranded",
+    "repeat": {
+      "stitches": 20,
+      "rows": 28
+    },
+    "analysisOptions": {
+      "longFloatThreshold": 7,
+      "isolatedRegionThreshold": 2,
+      "maxColorsPerRow": 2
+    },
+    "evaluations": [],
+    "placement": {
+      "note": "Produced by the research companion. See the provenance file.",
+      "region": "fixture"
+    }
+  }
+}

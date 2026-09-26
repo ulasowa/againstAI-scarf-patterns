@@ -1,0 +1,60 @@
+{
+  "format": "adversarial-knit-lab.model-manifest",
+  "version": 1,
+  "note": "Models this application can actually run, with the preprocessing and decoding it relies on. There is deliberately no 'load any ONNX model' option: supporting an arbitrary artifact would mean guessing its input layout, normalisation and output decoding, and guessing those produces confident numbers that mean nothing.",
+  "measuredOn": "2026-09-25",
+  "models": [
+    {
+      "id": "coco-ssd/lite_mobilenet_v2",
+      "family": "SSD (TensorFlow.js coco-ssd)",
+      "variant": "lite_mobilenet_v2",
+      "runtime": "@tensorflow/tfjs 4.x, WebGL backend with a CPU fallback",
+      "package": "@tensorflow-models/coco-ssd@2.2.3",
+      "artifactUrl": "https://storage.googleapis.com/tfjs-models/savedmodel/ssdlite_mobilenet_v2/model.json",
+      "artifactHash": null,
+      "artifactHashNote": "Served by a third-party CDN. No checksum is published here because none was independently verified; recording an unchecked hash would be worse than recording none.",
+      "approximateDownloadBytes": 18561843,
+      "downloadNote": "Measured by summing model.json and the Content-Length of all 5 weight shards.",
+      "license": "Apache-2.0 (tfjs-models); weights hosted by Google",
+      "inputResolution": "native image size; the graph resizes internally to 300x300",
+      "channelOrder": "RGB",
+      "normalization": "uint8 [0,255] input; normalisation is baked into the graph",
+      "resizeBehavior": "bilinear resize inside the SavedModel graph, aspect ratio not preserved",
+      "outputLayout": "boxes in pixel coordinates [x, y, width, height] plus class label and score",
+      "classMapping": "COCO 80 classes, mapped to label strings by the coco-ssd package",
+      "nmsBehavior": "non-max suppression applied by the coco-ssd package",
+      "defaultReportingThreshold": 0.35,
+      "role": "baseline",
+      "roleNote": "A practical baseline detector. Not a representative sample of current detectors, and results do not transfer to other models."
+    },
+    {
+      "id": "coco-ssd/mobilenet_v2",
+      "family": "SSD (TensorFlow.js coco-ssd)",
+      "variant": "mobilenet_v2",
+      "runtime": "@tensorflow/tfjs 4.x, WebGL backend with a CPU fallback",
+      "package": "@tensorflow-models/coco-ssd@2.2.3",
+      "artifactUrl": "https://storage.googleapis.com/tfjs-models/savedmodel/ssd_mobilenet_v2/model.json",
+      "artifactHash": null,
+      "artifactHashNote": "As above.",
+      "approximateDownloadBytes": 67771262,
+      "downloadNote": "Measured by summing model.json and the Content-Length of all 17 weight shards.",
+      "license": "Apache-2.0 (tfjs-models); weights hosted by Google",
+      "inputResolution": "native image size; the graph resizes internally to 300x300",
+      "channelOrder": "RGB",
+      "normalization": "uint8 [0,255] input; normalisation is baked into the graph",
+      "resizeBehavior": "bilinear resize inside the SavedModel graph, aspect ratio not preserved",
+      "outputLayout": "boxes in pixel coordinates [x, y, width, height] plus class label and score",
+      "classMapping": "COCO 80 classes, mapped to label strings by the coco-ssd package",
+      "nmsBehavior": "non-max suppression applied by the coco-ssd package",
+      "defaultReportingThreshold": 0.35,
+      "role": "second variant",
+      "roleNote": "Larger and more accurate than the lite variant. Results are not comparable across variants and are never pooled."
+    }
+  ],
+  "notSupported": [
+    {
+      "id": "onnxruntime-web",
+      "reason": "Not shipped. Adding a second inference runtime is only worth its bundle cost once there is a verified artifact behind it: licence, input layout, normalisation, resize behaviour and a tested output decoder. src/features/evaluation/adapter.ts is the seam it would use."
+    }
+  ]
+}

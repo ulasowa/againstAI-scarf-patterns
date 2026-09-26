@@ -1,0 +1,36 @@
+name: Browser tests
+
+# Kept separate from the deployment workflow: these install a browser and are
+# slower, and a flaky browser run must never block a deployment that already
+# passed type checking and the domain tests.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: adversarial-knit-lab
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: adversarial-knit-lab/.nvmrc
+          cache: npm
+          cache-dependency-path: adversarial-knit-lab/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: adversarial-knit-lab/test-results
+          retention-days: 7
