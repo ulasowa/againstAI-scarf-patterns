@@ -3,6 +3,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import type {
   ConditionKind,
   EvaluationRecord,
+  StitchGrid,
   TransformSettings,
 } from '../../types/project'
 import type { ProjectStore } from '../../state/useProjectStore'
@@ -28,6 +29,13 @@ import {
 } from './metrics'
 import { validateGarmentQuad, type Quad } from './overlay'
 import { OBJECTIVE_DESCRIPTION, runSearch, searchBudget, type Candidate, type SearchResult } from '../search/search'
+import {
+  OPTIMISER_DESCRIPTION,
+  formatObjective,
+  optimiseBudget,
+  optimiseChart,
+  type OptimiseResult,
+} from '../search/optimise'
 import { ImageAnnotator } from '../../components/ImageAnnotator'
 import { SubTabs } from '../../components/SubTabs'
 import { TexturePreview } from '../../components/TexturePreview'
@@ -93,6 +101,11 @@ export function EvaluatePanel({ store }: { store: ProjectStore }) {
   const [searchBest, setSearchBest] = useState<Candidate | null>(null)
   const [searching, setSearching] = useState(false)
   const [holdoutUsedForSelection, setHoldoutUsedForSelection] = useState(false)
+  const [optimiseSteps, setOptimiseSteps] = useState(120)
+  const [optimiseSeed, setOptimiseSeed] = useState(1)
+  const [optimising, setOptimising] = useState(false)
+  const [optimiseResult, setOptimiseResult] = useState<OptimiseResult | null>(null)
+  const [optimiseBest, setOptimiseBest] = useState<StitchGrid | null>(null)
   const [mainTab, setMainTab] = useState('measure')
 
   const registryEntry = MODEL_REGISTRY.find((m) => m.id === modelId)!
@@ -366,6 +379,60 @@ export function EvaluatePanel({ store }: { store: ProjectStore }) {
       else setRunError(error instanceof Error ? error.message : String(error))
     } finally {
       setSearching(false)
+      setProgress(null)
+      abortRef.current = null
+    }
+  }
+
+  /**
+   * Optimise the stitch grid directly against the loaded model.
+   *
+   * This is the part that corresponds to what the published work actually
+   * does. Everything else in this application generates or measures; this is
+   * the only thing that searches for a pattern because of what a detector does
+   * with it.
+   */
+  const optimise = async () => {
+    const adapter = model.adapter
+    if (!adapter || loadState !== 'ready') return
+    if (optimizationImages.length === 0) {
+      setRunError('Optimisation needs at least one photograph in the optimisation split.')
+      return
+    }
+    setOptimising(true)
+    setRunError(null)
+    setOptimiseResult(null)
+    const controller = new AbortController()
+    abortRef.current = controller
+    try {
+      const result = await optimiseChart(
+        adapter,
+        {
+          project,
+          steps: optimiseSteps,
+          seed: optimiseSeed,
+          constraints: {
+            maxFloat: project.analysisOptions.longFloatThreshold,
+            enforceColorsPerRow: true,
+          },
+          baseConfig: { ...baseConfig, conditions: ['original', 'chart-pattern'] },
+          optimizationImages,
+        },
+        {
+          signal: controller.signal,
+          onProgress: (p) => {
+            setProgress({ completed: p.step, total: p.steps, message: p.message })
+            setOptimiseBest(p.bestGrid)
+          },
+        },
+      )
+      setOptimiseResult(result)
+      setOptimiseBest(result.bestGrid)
+    } catch (error) {
+      if (isAbort(error)) setRunError('Optimisation cancelled. The best chart so far is kept below.')
+      else setRunError(error instanceof Error ? error.message : String(error))
+    } finally {
+      setOptimising(false)
       setProgress(null)
       abortRef.current = null
     }
@@ -717,6 +784,130 @@ export function EvaluatePanel({ store }: { store: ProjectStore }) {
 
       </>
     ) },
+    {
+      id: 'optimise',
+      label: 'Optimise',
+      badge: optimiseResult?.improved ? 'better' : undefined,
+      render: () => (
+        <Section
+          title="Optimise against the model"
+          description="Edits the stitches themselves, keeping a change only when the detector's grip on the target weakens. This is the part that corresponds to what the published work does."
+        >
+          <NumberField
+            label="Steps"
+            value={optimiseSteps}
+            min={10}
+            max={2000}
+            hint="One forward query per step, per optimisation example."
+            onChange={setOptimiseSteps}
+          />
+          <NumberField label="Seed" value={optimiseSeed} onChange={setOptimiseSeed} />
+          <p className="hint">
+            Estimated workload:{' '}
+            {optimizationImages.length > 0
+              ? optimiseBudget({
+                  project,
+                  steps: optimiseSteps,
+                  seed: optimiseSeed,
+                  constraints: { maxFloat: 7, enforceColorsPerRow: true },
+                  baseConfig: { ...baseConfig, conditions: ['original', 'chart-pattern'] },
+                  optimizationImages,
+                })
+              : 0}{' '}
+            inference calls. Changes that would break the knitting constraints are rejected before
+            they reach the model, so they cost nothing.
+          </p>
+
+          <div className="button-row">
+            <button
+              type="button"
+              className="primary"
+              onClick={optimise}
+              disabled={
+                optimising || running || searching || loadState !== 'ready' ||
+                optimizationImages.length === 0
+              }
+            >
+              Optimise the chart
+            </button>
+            <button type="button" onClick={cancel} disabled={!optimising}>
+              Cancel
+            </button>
+          </div>
+          {loadState !== 'ready' || optimizationImages.length === 0 ? (
+            <p className="hint">
+              Needs a loaded model and at least one photograph, with a person in it, in the
+              optimisation split.
+            </p>
+          ) : null}
+
+          {optimiseBest ? (
+            <div className="search-best">
+              <TexturePreview
+                grid={optimiseBest}
+                palette={project.palette}
+                gauge={project.gauge}
+                repeatsX={2}
+                height={150}
+                label="Best chart found so far"
+              />
+              {optimiseResult ? (
+                <>
+                  <div className="stat-row">
+                    <Stat label="Started at" value={formatObjective(optimiseResult.startObjective)} />
+                    <Stat label="Best found" value={formatObjective(optimiseResult.bestObjective)} />
+                  </div>
+                  <div className="stat-row">
+                    <Stat label="Changes kept" value={String(optimiseResult.accepted)} />
+                    <Stat
+                      label="Rejected unknittable"
+                      value={String(optimiseResult.rejectedByConstraint)}
+                    />
+                  </div>
+                </>
+              ) : null}
+              <button
+                type="button"
+                className="primary"
+                onClick={() => {
+                  store.commitGrid(optimiseBest, 'optimised chart')
+                  setMainTab('measure')
+                }}
+              >
+                Save this chart to the editor
+              </button>
+            </div>
+          ) : null}
+
+          {optimiseResult ? (
+            <Callout tone={optimiseResult.improved ? 'success' : 'warning'}>
+              {optimiseResult.improved
+                ? `The optimiser weakened the detector on the optimisation split: ${formatObjective(optimiseResult.startObjective)} to ${formatObjective(optimiseResult.bestObjective)} over ${optimiseResult.queries} queries. That is progress on the images it optimised against, and nothing more yet. Save the chart, then run a full evaluation to see what the holdout says.`
+                : `No change beat the starting chart over ${optimiseResult.queries} queries. That is a result, not a failure to report. More steps, more photographs or a different starting pattern may do better; they may not.`}
+            </Callout>
+          ) : null}
+
+          <Callout tone="warning" title="What a result here does and does not mean">
+            The optimiser works against the model you loaded, the photographs you supplied and the
+            rendering settings you chose. Improvement on the optimisation split is not a finding.
+            The finding is what the held-out photographs say afterwards, and it can be negative.
+            Nothing here transfers to another detector, to face recognition, or to knitted fabric
+            in the physical world.
+          </Callout>
+
+          <Details summary="How it works, and why it is weaker than the papers">
+            <p>{OPTIMISER_DESCRIPTION}</p>
+            <p>
+              The published attacks use gradients. TensorFlow.js runs the converted COCO-SSD graph
+              for inference only and exposes no gradient through it, so this optimises with forward
+              queries alone. That is a substantially weaker optimiser and needs far more queries to
+              get anywhere. For gradient-based work, see the Python companion in{' '}
+              <code>research/</code>.
+            </p>
+          </Details>
+        </Section>
+      ),
+    },
     { id: 'search', label: 'Search', render: () => (
       <>
               <Section

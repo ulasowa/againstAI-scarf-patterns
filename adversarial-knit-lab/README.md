@@ -40,6 +40,14 @@ running several screen-heights deep; see `docs/ui-audit.md`.
 4. **Export** — printable charts, written colour sequences, images, editable
    project files and reproducible evaluation records.
 
+The Evaluate tab also **optimises**: it edits the stitches against the loaded
+detector and keeps a change only when the detector's grip on the target
+weakens, rejecting anything that breaks the knitting constraints. That loop is
+the transferable part of the published research; the patterns in those papers
+are its outputs, not recipes. It works from forward queries alone, which is
+weaker than the gradient attacks in the literature, and whether a run achieved
+anything is decided by the held-out photographs rather than by the run itself.
+
 ## Running it
 
 No backend, no database, no account, no API key — and no particular host.

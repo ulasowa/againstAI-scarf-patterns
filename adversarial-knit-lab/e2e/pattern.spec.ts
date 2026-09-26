@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { gotoTab, openApp, subTab, trackConsoleErrors } from './helpers'
+import { gotoTab, openApp, sceneFixture, subTab, trackConsoleErrors } from './helpers'
 
 test.describe('pattern probe', () => {
   test('offers to load a model and says what it does not prove', async ({ page }) => {
@@ -190,5 +190,28 @@ test.describe('camera capture', () => {
     await expect(page.locator('.image-list li')).toHaveCount(1)
     await expect(page.locator('.image-list li').first()).toContainText('camera-')
     await context.close()
+  })
+})
+
+test.describe('optimiser', () => {
+  test('is offered, explains its limits, and needs a model and a photograph', async ({ page }) => {
+    await openApp(page, 'evaluate')
+    await subTab(page, 'Optimise')
+
+    await expect(page.getByRole('button', { name: 'Optimise the chart' })).toBeDisabled()
+    await expect(page.getByText(/Needs a loaded model and at least one photograph/)).toBeVisible()
+
+    // The honest framing is on screen, not buried in documentation.
+    await expect(page.getByText(/Improvement on the optimisation split is not a finding/)).toBeVisible()
+  })
+
+  test('reports its query budget before spending anything', async ({ page }) => {
+    await openApp(page, 'evaluate')
+    await subTab(page, '2 Photos')
+    await page.getByLabel('Photographs to evaluate').setInputFiles(sceneFixture())
+    await subTab(page, 'Optimise')
+    await page.getByLabel('Steps').fill('50')
+    // 1 image x (1 baseline + 50 steps + 1 start) = 52.
+    await expect(page.getByText(/52 inference calls/)).toBeVisible()
   })
 })

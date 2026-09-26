@@ -226,6 +226,35 @@ and the two contour families produced none at all. That is a real result and it
 is reported here rather than buried. It is also exactly what the first
 paragraph of this section predicts: structure is not optimisation.
 
+## The method is the transferable part
+
+If the structural families do not inherit the papers' results, what does?
+
+**The method.** Every one of those papers optimises a texture against a model,
+measuring and adjusting until the detector fails. That loop is implementable,
+and this application implements it in the Optimise group of the Evaluate tab:
+it edits the stitch grid directly, keeps a change only when the detector's grip
+on the annotated target weakens, and rejects outright any change that breaks
+the knitting constraints.
+
+Two honest differences from the published work:
+
+1. **No gradients.** TensorFlow.js executes the converted COCO-SSD graph for
+   inference only and exposes no gradient through it, so the optimiser works
+   from forward queries alone. That is substantially weaker than the published
+   attacks and needs far more queries. Gradient-based work belongs in the
+   Python companion, where a PyTorch detector can be differentiated.
+2. **No expectation over transformation by default.** The published attacks
+   train under sampled transformations so the result survives being worn. The
+   transformation probes here can be switched on during optimisation, but the
+   budget grows with every sample.
+
+A chart that comes out of that loop can honestly be described as having reduced
+detection *on the model, photographs and settings it was optimised against*,
+with the holdout split as the check on whether that meant anything. That is the
+only sense in which anything in this application "works", and it is a sense
+that can be verified rather than asserted.
+
 ## The standing claim
 
 This application generates knitting charts and measures them against a detector
